@@ -21,7 +21,10 @@ export const CsvRowSchema = z.object({
     }
     return n;
   }),
-  image_url: z.string().optional().transform((val) => val?.trim() || null),
+  image_url: z
+    .string()
+    .optional()
+    .transform((val) => val?.trim() || null),
 });
 
 export type CsvRow = z.infer<typeof CsvRowSchema>;

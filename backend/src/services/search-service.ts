@@ -20,11 +20,7 @@ export class SearchService {
     let filtered = this.cache.getProducts();
 
     if (params.q) {
-      const tokens = params.q
-        .toLowerCase()
-        .replace(/\s+/g, ' ')
-        .split(' ')
-        .filter(Boolean);
+      const tokens = params.q.toLowerCase().replace(/\s+/g, ' ').split(' ').filter(Boolean);
 
       filtered = filtered.filter((p) =>
         tokens.every(
@@ -78,7 +74,12 @@ export class SearchService {
 
   getVendors(): string[] {
     const vendors = [
-      ...new Set(this.cache.getProducts().map((p) => p.vendor).filter(Boolean)),
+      ...new Set(
+        this.cache
+          .getProducts()
+          .map((p) => p.vendor)
+          .filter(Boolean),
+      ),
     ];
     return vendors.sort();
   }

@@ -6,8 +6,7 @@ import { SearchService } from './services/search-service';
 import { createApp } from './app';
 
 const PORT = parseInt(process.env.PORT ?? '3001', 10);
-const CSV_PATH =
-  process.env.PRODUCTS_CSV_PATH ?? path.join(process.cwd(), 'data', 'products.csv');
+const CSV_PATH = process.env.PRODUCTS_CSV_PATH ?? path.join(process.cwd(), 'data', 'products.csv');
 
 async function main(): Promise<void> {
   const repository = new CsvRepository(CSV_PATH);
@@ -18,10 +17,7 @@ async function main(): Promise<void> {
     await cache.load();
     console.log(`[startup] Catalog loaded: ${cache.getCount()} products`);
   } catch (err) {
-    console.error(
-      '[startup] Failed to load catalog:',
-      err instanceof Error ? err.message : err,
-    );
+    console.error('[startup] Failed to load catalog:', err instanceof Error ? err.message : err);
     // Serve 503 from the API rather than exiting — allows hot-swap of the CSV
   }
 

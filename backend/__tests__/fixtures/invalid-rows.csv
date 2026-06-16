@@ -1,0 +1,5 @@
+id,title,description,vendor,price,inventory,image_url
+1,Valid Product One,First valid product,Vendor A,10.00,5,
+bad-price-row,Bad Price Row,Invalid price value,Vendor B,not-a-number,5,
+,Empty ID Row,Missing ID field,Vendor C,15.00,3,
+4,Valid Product Two,Second valid product,Vendor D,20.00,10,

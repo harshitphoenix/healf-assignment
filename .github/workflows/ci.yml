@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          npm ci --prefix backend
+          npm ci --prefix frontend
+
+      - name: Type-check
+        run: |
+          npm run typecheck --prefix backend
+          npm run typecheck --prefix frontend
+
+      - name: Lint
+        run: npm run lint --prefix frontend
+
+      - name: Check formatting
+        run: npm run format --prefix backend
+
+      - name: Run tests with coverage
+        run: npm run test:coverage --prefix backend
+
+      - name: Build
+        run: |
+          npm run build --prefix backend
+          npm run build --prefix frontend

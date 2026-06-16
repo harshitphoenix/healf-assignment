@@ -1,0 +1,4 @@
+id,title,description,vendor,price,inventory,image_url
+1,First Product,First occurrence,Vendor A,10.00,5,
+2,Second Product,Unique ID product,Vendor B,15.00,3,
+1,Duplicate Product,Second occurrence with same ID,Vendor C,20.00,8,

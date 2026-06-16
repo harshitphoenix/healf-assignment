@@ -8,8 +8,7 @@ import { CatalogCache } from '../src/cache/catalog-cache';
 import { SearchCache } from '../src/cache/search-cache';
 import { SearchService } from '../src/services/search-service';
 
-const CSV_PATH =
-  process.env.PRODUCTS_CSV_PATH ?? path.join(process.cwd(), 'data', 'products.csv');
+const CSV_PATH = process.env.PRODUCTS_CSV_PATH ?? path.join(process.cwd(), 'data', 'products.csv');
 
 const SAMPLE_QUERIES: Array<{
   q?: string;
