@@ -2,6 +2,10 @@
 
 A full-stack health supplement search application built as a split-stack take-home.
 The Express API owns all business logic; the Next.js frontend is a pure UI consumer.
+
+## Loom Video link - [https://www.loom.com/share/e27c7a9b2f964cdab7a391613fb0a28b](url)
+
+
 <img width="1279" height="933" alt="image" src="https://github.com/user-attachments/assets/9a9392f4-3797-4fe3-a988-608acc27faae" />
 
 ---
