@@ -1,11 +1,22 @@
 import type { Product, ProductsResponse } from '../types/product';
 import type { ValidatedSearchParams } from '../schemas/search-params';
 import type { CatalogCache } from '../cache/catalog-cache';
+import { SearchCache, buildSearchCacheKey } from '../cache/search-cache';
 
 export class SearchService {
-  constructor(private readonly cache: CatalogCache) {}
+  constructor(
+    private readonly cache: CatalogCache,
+    private readonly searchCache: SearchCache,
+  ) {}
 
   search(params: ValidatedSearchParams): ProductsResponse {
+    const key = buildSearchCacheKey(params);
+    const cached = this.searchCache.get<ProductsResponse>(key);
+    if (cached) {
+      console.log(`[search-cache] HIT ${key}`);
+      return cached;
+    }
+
     let filtered = this.cache.getProducts();
 
     if (params.q) {
@@ -55,10 +66,14 @@ export class SearchService {
     const start = (params.page - 1) * params.pageSize;
     const products = sorted.slice(start, start + params.pageSize);
 
-    return {
+    const result: ProductsResponse = {
       products,
       meta: { page: params.page, pageSize: params.pageSize, totalResults, totalPages },
     };
+
+    console.log(`[search-cache] MISS ${key}`);
+    this.searchCache.set(key, result);
+    return result;
   }
 
   getVendors(): string[] {

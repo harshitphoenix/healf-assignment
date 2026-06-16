@@ -1,6 +1,7 @@
 import path from 'path';
 import { CsvRepository } from './repository/csv-repository';
 import { CatalogCache } from './cache/catalog-cache';
+import { SearchCache } from './cache/search-cache';
 import { SearchService } from './services/search-service';
 import { createApp } from './app';
 
@@ -24,8 +25,11 @@ async function main(): Promise<void> {
     // Serve 503 from the API rather than exiting — allows hot-swap of the CSV
   }
 
-  const searchService = new SearchService(cache);
+  const searchCache = new SearchCache();
+  const searchService = new SearchService(cache, searchCache);
   const app = createApp(searchService, cache);
+
+  cache.startPeriodicRefresh();
 
   app.listen(PORT, () => {
     console.log(`[server] Running on http://localhost:${PORT}`);

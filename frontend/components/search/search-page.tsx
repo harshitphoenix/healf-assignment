@@ -35,17 +35,30 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Focus management: move focus to result count after user-triggered searches
+  const resultsRef = useRef<HTMLParagraphElement>(null);
+  const hasInteracted = useRef(false);
+
   // Keep local input in sync when the URL q param changes externally
   // (e.g. browser back/forward, or clear-all filters)
   useEffect(() => {
     setInputValue(q);
   }, [q]);
 
+  // Move focus to result count after search completes, but only after user interaction
+  // (not on initial page load)
+  useEffect(() => {
+    if (!loading && hasInteracted.current && resultsRef.current) {
+      resultsRef.current.focus();
+    }
+  }, [loading]);
+
   // Debounced search: update URL after 400ms of no typing.
   // Reads window.location.search at fire time so stale closures never
   // overwrite an intervening filter change.
   const handleQueryChange = useCallback(
     (value: string) => {
+      hasInteracted.current = true;
       setInputValue(value);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
@@ -63,6 +76,7 @@ export default function SearchPage() {
   // Also reads the live URL so concurrent q debounce won't be lost.
   const handleFilterChange = useCallback(
     (filters: { vendor?: string; minPrice?: string; maxPrice?: string; availability?: string }) => {
+      hasInteracted.current = true;
       const params = new URLSearchParams(window.location.search);
       for (const [key, value] of Object.entries(filters)) {
         if (value) params.set(key, value);
@@ -76,6 +90,7 @@ export default function SearchPage() {
 
   const handlePageChange = useCallback(
     (newPage: number) => {
+      hasInteracted.current = true;
       const params = new URLSearchParams(window.location.search);
       params.set('page', String(newPage));
       router.replace(`/?${params.toString()}`, { scroll: false });
@@ -126,7 +141,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Sticky search header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white px-4 py-4 shadow-sm">
         <div className="mx-auto max-w-7xl">
           <h1 className="mb-3 text-xl font-bold text-gray-900">Healf Product Search</h1>
@@ -134,9 +149,9 @@ export default function SearchPage() {
         </div>
       </header>
 
-      {/* Body */}
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        {/* Mobile filters (above grid on small screens) */}
+      {/* Page main — wraps both sidebar and results for correct landmark semantics */}
+      <main className="mx-auto max-w-7xl px-4 py-6">
+        {/* Mobile filters — shown above results on small screens */}
         <div className="mb-6 lg:hidden">
           <FilterPanel
             vendors={vendors}
@@ -149,8 +164,8 @@ export default function SearchPage() {
         </div>
 
         <div className="flex gap-8">
-          {/* Desktop sidebar */}
-          <aside className="hidden w-56 shrink-0 lg:block">
+          {/* Desktop sidebar — FilterPanel renders its own <aside> landmark */}
+          <div className="hidden w-56 shrink-0 lg:block">
             <FilterPanel
               vendors={vendors}
               selectedVendor={vendor}
@@ -159,34 +174,31 @@ export default function SearchPage() {
               availability={availability}
               onChange={handleFilterChange}
             />
-          </aside>
+          </div>
 
-          {/* Results */}
-          <main className="flex-1 min-w-0">
-            {/* Error */}
+          {/* Results column */}
+          <div className="flex-1 min-w-0">
             {error && <ErrorBanner message={error} onRetry={handleRetry} />}
 
             {!error && (
               <>
-                {/* Result count */}
-                {meta && !loading && (
-                  <p
-                    className="mb-4 text-sm text-gray-500"
-                    aria-live="polite"
-                    aria-atomic="true"
-                  >
-                    {meta.totalResults.toLocaleString()}{' '}
-                    {meta.totalResults === 1 ? 'product' : 'products'} found
-                  </p>
-                )}
+                {/* Result count — aria-live announces changes; tabIndex allows programmatic focus */}
+                <p
+                  ref={resultsRef}
+                  tabIndex={-1}
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="mb-4 text-sm text-gray-500 focus:outline-none"
+                >
+                  {meta && !loading
+                    ? `${meta.totalResults.toLocaleString()} ${meta.totalResults === 1 ? 'product' : 'products'} found`
+                    : ' '}
+                </p>
 
-                {/* Grid / skeletons */}
                 <ProductGrid products={products} loading={loading} />
 
-                {/* Empty state */}
                 {isEmpty && <EmptyState />}
 
-                {/* Pagination */}
                 {showPagination && (
                   <Pagination
                     page={meta.page}
@@ -196,9 +208,9 @@ export default function SearchPage() {
                 )}
               </>
             )}
-          </main>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

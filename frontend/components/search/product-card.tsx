@@ -37,12 +37,12 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-4 gap-2">
-        <h2
+        <h3
           className="text-sm font-semibold text-gray-900 line-clamp-2 leading-snug"
           title={title}
         >
           {title}
-        </h2>
+        </h3>
 
         <p className="text-xs text-gray-500">{vendor}</p>
 

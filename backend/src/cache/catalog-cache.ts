@@ -21,4 +21,23 @@ export class CatalogCache {
   getCount(): number {
     return this.products?.length ?? 0;
   }
+
+  // Reload the catalog every `intervalMs` ms in the background.
+  // Uses unref() so the timer never prevents a clean process exit.
+  startPeriodicRefresh(intervalMs = 15 * 60 * 1000): void {
+    const timer = setInterval(async () => {
+      console.log('[catalog-cache] Refreshing catalog...');
+      try {
+        const fresh = await this.repository.getAll();
+        this.products = fresh;
+        console.log(`[catalog-cache] Refreshed: ${fresh.length} products`);
+      } catch (err) {
+        console.error(
+          '[catalog-cache] Refresh failed (keeping existing catalog):',
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }, intervalMs);
+    timer.unref();
+  }
 }
