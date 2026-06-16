@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Healf Product Search — Frontend
 
-## Getting Started
+Next.js 16 App Router UI for the Healf product search application.
+Talks to the Express backend at `NEXT_PUBLIC_API_URL`; never imports backend code directly.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **React 19**
+- **Tailwind CSS v4**
+- **TypeScript** (strict)
+
+## Getting started
 
 ```bash
+# From the repo root (starts both backend and frontend)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Frontend only
+npm run dev --prefix frontend
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Runs at [http://localhost:3000](http://localhost:3000). Requires the backend on port 3001.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Default | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3001` | Backend API base URL |
 
-## Learn More
+Set in `frontend/.env.local` (already present for local dev).
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run dev          # Development server with hot reload
+npm run build        # Production build
+npm run typecheck    # tsc --noEmit
+npm run lint         # ESLint
+npm run format       # Prettier check
+npm run format:fix   # Prettier write
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key components
 
-## Deploy on Vercel
+| Component | Role |
+|---|---|
+| `app/page.tsx` | Server component; wraps `SearchPage` in `<Suspense>` |
+| `components/search/search-page.tsx` | Orchestrator — URL state, debounce, AbortController |
+| `components/search/filter-panel.tsx` | Sidebar filters; renders its own `<aside>` landmark |
+| `components/search/product-grid.tsx` | Responsive grid with `aria-live` result announcements |
+| `lib/api-client.ts` | `fetchProducts()` and `fetchVendors()` with typed errors |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Architecture notes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All filter state lives in the URL query string — deep linking and browser back/forward work for free.
+The search input debounces 400ms before updating the URL; all other filters update immediately.
+`AbortController` cancels in-flight requests when params change before a response arrives.
